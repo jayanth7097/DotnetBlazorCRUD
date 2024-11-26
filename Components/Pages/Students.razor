@@ -1,0 +1,79 @@
+﻿@page "/students"
+@using dummy.Models
+@using dummy.Services
+
+@inject IStudentsServices StudentsServices
+@inject NavigationManager NavigationManager
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+
+
+<PageTitle>Students</PageTitle>
+
+<h3>Subjects</h3>
+
+@if (students == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Specialty</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var students in students)
+            {
+                <tr>
+                    <td>@students.Name</td>
+                    <td>@students.Specialty</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="@(() => EditStudents(students.StudentId))">Edit</button>
+                        <button class="btn btn-warning" @onclick="@(() => DeleteStudents(students.StudentId))">Delete</button>
+
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <button class="btn btn-success" @onclick="AddStudents">Add Subject</button>
+}
+
+@code {
+    List<dummy.Models.Students> students = new List<dummy.Models.Students>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        students = await StudentsServices.GetAllStudentsAsync();
+    }
+
+    void AddStudents()
+    {
+        NavigationManager.NavigateTo("/edit-students");
+    }
+
+    void EditStudents(int id)
+    {
+        NavigationManager.NavigateTo($"/edit-students/{id}");
+    }
+
+    async Task DeleteStudents(int id)
+    {
+        try
+        {
+            await StudentsServices.DeleteStudentsAsync(id);
+            students = await StudentsServices.GetAllStudentsAsync(); // Refresh list
+        }
+        catch (Exception ex)
+        {
+            // Handle error, possibly show a message to the user
+            Console.WriteLine($"Error deleting student: {ex.Message}");
+        }
+    }
+}

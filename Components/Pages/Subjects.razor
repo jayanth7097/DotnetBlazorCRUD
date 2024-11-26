@@ -1,0 +1,77 @@
+﻿@page "/subjects"
+@using dummy.Services
+@using dummy.Models
+@inject ISubjectsServices SubjectsServices
+@inject IStudentsServices StudentsServices
+@inject NavigationManager NavigationManager
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+
+<PageTitle>Subjects</PageTitle>
+
+<h3>Students</h3>
+
+@if (subjects == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Grade</th>
+                <th>Teacher</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var subject in subjects)
+            {
+                <tr>
+                    <td>@subject.Name</td>
+                    <td>@subject.Age</td>
+                    <td>@subject.Grade</td>
+                    <td>@subject.Student.Name</td>
+                    <td>
+                        @* <button class="btn btn-primary" @onclick="@(() => EditPatient(patient.PatientId))">Edit</button> *@
+                        @* <button class="btn btn-warning" @onclick="@(() => DeletePatient(patient.PatientId))">Delete</button> *@
+                        <button class="btn btn-primary" @onclick="() => EditSubject(subject.SubjectId)">Edit</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteSubject(subject.SubjectId)">Delete</button>
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <button class="btn btn-success" @onclick="AddSubject">Add Student</button>
+}
+
+@code {
+    List<dummy.Models.Subjects> subjects = new List<dummy.Models.Subjects>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        subjects = await SubjectsServices.GetAllSubjectsAsync();
+    }
+
+    void AddSubject()
+    {
+        NavigationManager.NavigateTo("/edit-subjects");
+    }
+
+
+    void EditSubject(int id)
+    {
+        NavigationManager.NavigateTo($"/edit-subjects/{id}");
+    }
+
+    async Task DeleteSubject(int id)
+    {
+        await SubjectsServices.DeleteSubjectsAsync(id);
+        subjects = await SubjectsServices.GetAllSubjectsAsync();
+    }
+}
